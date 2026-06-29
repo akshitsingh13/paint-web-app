@@ -1,4 +1,4 @@
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, use } from "react";
 
 export default function useCanvas({
   canvasRef,
@@ -6,10 +6,22 @@ export default function useCanvas({
   width,
   height,
   setStrokes,
+  opacity,
+  color,
 }) {
   const isMousePressed = useRef(false);
   const isDrawing = useRef(false);
+  const colorRef = useRef("");
+  const globalAlpha = useRef(1);
 
+  useEffect(() => {
+    colorRef.current = color;
+  }, [color]);
+
+  useEffect(() => {
+    globalAlpha.current = opacity;
+    console.log(globalAlpha.current);
+  }, [opacity]);
   const getCoords = (e) => {
     const canvas = canvasRef.current;
     const rect = canvas.getBoundingClientRect();
@@ -56,12 +68,15 @@ export default function useCanvas({
     context.globalCompositeOperation =
       tool === "brush" ? "source-over" : "destination-out";
     context.lineWidth = 5; // MAKE THIS DYNAMIC INTO A SLIDER
-    context.strokeStyle = "black"; // MAKE THIS DYNAMIC INTO A COLOR PICKER
+    context.strokeStyle = colorRef.current;
+    context.globalAlpha = globalAlpha.current;
     context.lineCap = "round";
     context.lineJoin = "round";
     if (isMousePressed.current) {
       context.lineTo(x, y);
       context.stroke();
+      context.beginPath();
+      context.moveTo(x, y);
     }
   };
 

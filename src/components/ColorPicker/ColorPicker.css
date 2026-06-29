@@ -1,0 +1,33 @@
+.color-picker {
+  width: 64px;
+  height: 64px;
+  padding: 0;
+  border: 2px solid #d1d5db;
+  border-radius: 10px;
+  background: #fff;
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.color-picker:hover {
+  border-color: black;
+}
+
+.color-picker:focus {
+  outline: none;
+  border-color: black;
+}
+
+.color-picker::-webkit-color-swatch-wrapper {
+  padding: 0;
+}
+
+.color-picker::-webkit-color-swatch {
+  border: none;
+  border-radius: 8px;
+}
+
+.color-picker::-moz-color-swatch {
+  border: none;
+  border-radius: 8px;
+}
