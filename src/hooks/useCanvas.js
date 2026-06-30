@@ -13,6 +13,7 @@ export default function useCanvas({
   const colorRef = useRef("");
   const lastCanvasState = useRef(null);
   const isReentering = useRef(false);
+  const lastPoint = useRef({ x: 0, y: 0 });
 
   useEffect(() => {
     colorRef.current = color;
@@ -43,9 +44,10 @@ export default function useCanvas({
     isReentering.current = false;
 
     lastCanvasState.current = context.getImageData(0, 0, width, height);
-
     context.beginPath();
     const { x, y } = getCoords(e);
+
+    lastPoint.current = { x, y };
     context.moveTo(x, y);
   };
 
@@ -70,6 +72,9 @@ export default function useCanvas({
       isReentering.current = false;
     }
 
+    const midPointX = (lastPoint.current.x + x) / 2;
+    const midPointY = (lastPoint.current.y + y) / 2;
+
     if (lastCanvasState.current) {
       context.putImageData(lastCanvasState.current, 0, 0);
     }
@@ -81,8 +86,14 @@ export default function useCanvas({
     context.lineCap = "round";
     context.lineJoin = "round";
 
-    context.lineTo(x, y);
+    context.quadraticCurveTo(
+      lastPoint.current.x,
+      lastPoint.current.y,
+      midPointX,
+      midPointY,
+    );
     context.stroke();
+    lastPoint.current = { x, y };
   };
 
   const handleMouseLeave = () => {};
