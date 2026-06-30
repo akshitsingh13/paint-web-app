@@ -3,6 +3,10 @@
   height: 220px;
 }
 
+.my-picker:hover {
+  cursor: crosshair;
+}
+
 .my-picker .react-colorful__saturation {
   border-radius: 12px;
 }

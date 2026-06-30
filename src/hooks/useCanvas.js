@@ -13,6 +13,7 @@ export default function useCanvas({
   const isDrawing = useRef(false);
   const colorRef = useRef("");
   const globalAlpha = useRef(1);
+  const lastCanvasState = useRef(null);
 
   useEffect(() => {
     colorRef.current = color;
@@ -44,6 +45,9 @@ export default function useCanvas({
   const handleMouseDown = (e) => {
     const context = getContext();
     isMousePressed.current = true;
+
+    lastCanvasState.current = context.getImageData(0, 0, width, height);
+
     context.beginPath();
     const { x, y } = getCoords(e);
     context.moveTo(x, y);
@@ -61,23 +65,25 @@ export default function useCanvas({
   };
 
   const handleMouseMove = (e) => {
+    if (!isMousePressed.current) return;
     isDrawing.current = true;
     const { x, y } = getCoords(e);
     const context = getContext();
 
+    if (lastCanvasState.current) {
+      context.putImageData(lastCanvasState.current, 0, 0);
+    }
+
     context.globalCompositeOperation =
       tool === "brush" ? "source-over" : "destination-out";
-    context.lineWidth = 5; // MAKE THIS DYNAMIC INTO A SLIDER
+    context.lineWidth = 5;
     context.strokeStyle = colorRef.current;
     context.globalAlpha = globalAlpha.current;
     context.lineCap = "round";
     context.lineJoin = "round";
-    if (isMousePressed.current) {
-      context.lineTo(x, y);
-      context.stroke();
-      context.beginPath();
-      context.moveTo(x, y);
-    }
+
+    context.lineTo(x, y);
+    context.stroke();
   };
 
   const handleMouseLeave = () => {
