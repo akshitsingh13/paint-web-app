@@ -9,26 +9,28 @@ const BrushSizeSlider = ({ brushSize, setBrushSize }) => {
   };
   return (
     <>
-      <input
-        type="range"
-        min={1}
-        max={100}
-        value={brushSize || 1}
-        onChange={(e) => setBrushSize(Number(e.target.value))}
-        className="range range-sm"
-      />
-      <input
-        type="number"
-        min={1}
-        max={100}
-        value={brushSize}
-        onChange={handleChange}
-        className="input input-bordered w-full"
-        placeholder="Size"
-        onBlur={(e) => {
-          if (brushSize === "" || brushSize < 1) setBrushSize(5);
-        }}
-      />
+      <div className="flex gap-4 align-middle justify-center items-center">
+        <input
+          type="range"
+          min={1}
+          max={100}
+          value={brushSize || 1}
+          onChange={(e) => setBrushSize(Number(e.target.value))}
+          className="range range-sm"
+        />
+        <input
+          type="number"
+          min={1}
+          max={100}
+          value={brushSize}
+          onChange={handleChange}
+          className="input input-bordered w-16"
+          placeholder="Size"
+          onBlur={(e) => {
+            if (brushSize === "" || brushSize < 1) setBrushSize(5);
+          }}
+        />
+      </div>
     </>
   );
 };

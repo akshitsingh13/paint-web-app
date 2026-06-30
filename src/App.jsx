@@ -28,15 +28,29 @@ function App() {
     <>
       <div className="flex justify-center align-middle items-center gap-4 h-screen">
         <div className="flex gap-4">
-          <HexAlphaColorPicker
-            className="my-picker"
-            color={color}
-            onChange={setColor}
-          />
-          <BrushSizeSlider brushSize={brushSize} setBrushSize={setBrushSize} />
+          <div className="flex gap-4 flex-col">
+            <HexAlphaColorPicker
+              className="my-picker"
+              color={color}
+              onChange={setColor}
+            />
+            <BrushSizeSlider
+              brushSize={brushSize}
+              setBrushSize={setBrushSize}
+            />
+          </div>
+
           <div className="flex flex-col gap-4">
-            <Tool label="Brush" onClick={handleBrushTool} />
-            <Tool label="Eraser" onClick={handleEraserTool} />
+            <Tool
+              label="Brush"
+              onClick={handleBrushTool}
+              active={tool === "brush"}
+            />
+            <Tool
+              label="Eraser"
+              onClick={handleEraserTool}
+              active={tool === "eraser"}
+            />
             <Tool
               label="Undo"
               onClick={onUndo}
@@ -47,7 +61,7 @@ function App() {
               onClick={onRedo}
               disabled={redoStack.length === 0}
             />
-            <Tool label="Erase All" onClick={onEraseAll} />
+            <Tool label="Reset Canvas" onClick={onEraseAll} />
           </div>
         </div>
 

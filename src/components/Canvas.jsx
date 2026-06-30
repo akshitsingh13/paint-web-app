@@ -10,12 +10,13 @@ const Canvas = ({
   brushSize,
   canvasRef,
 }) => {
+  // Destructure the new pointer-based handlers from your updated hook
   const {
-    handleMouseDown,
-    handleMouseMove,
-    handleMouseUp,
-    handleMouseLeave,
-    handleMouseEnter,
+    handlePointerDown,
+    handlePointerMove,
+    handlePointerUp,
+    handlePointerLeave,
+    handlePointerEnter,
   } = useCanvas({
     canvasRef,
     tool,
@@ -30,14 +31,14 @@ const Canvas = ({
     <>
       <canvas
         ref={canvasRef}
-        className="border"
+        className="border bg-white rounded-lg"
         width={width}
         height={height}
-        onMouseMove={handleMouseMove}
-        onMouseDown={handleMouseDown}
-        onMouseUp={handleMouseUp}
-        onMouseLeave={handleMouseLeave}
-        onMouseEnter={handleMouseEnter}
+        onPointerMove={handlePointerMove}
+        onPointerDown={handlePointerDown}
+        onPointerUp={handlePointerUp}
+        onPointerLeave={handlePointerLeave}
+        onPointerEnter={handlePointerEnter}
       ></canvas>
     </>
   );

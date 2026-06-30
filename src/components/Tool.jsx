@@ -1,21 +1,14 @@
-const Tool = ({ label, onClick, disabled }) => {
+const Tool = ({ label, onClick, disabled, active }) => {
   return (
-    <>
-      <button
-        onClick={() => {
-          onClick();
-        }}
-        className="p-2 border rounded-sm cursor-pointer 
-        disabled:cursor-not-allowed 
-        disabled:opacity-50 
-        disabled:bg-gray-100 
-        disabled:text-gray-400 
-        disabled:border-gray-300"
-        disabled={disabled}
-      >
-        {label}
-      </button>
-    </>
+    <button
+      onClick={onClick}
+      disabled={disabled}
+      className={`btn btn-active ${
+        active ? "btn-primary" : ""
+      } disabled:cursor-not-allowed disabled:opacity-50`}
+    >
+      {label}
+    </button>
   );
 };
 

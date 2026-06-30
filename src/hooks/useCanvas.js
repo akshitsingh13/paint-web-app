@@ -9,13 +9,13 @@ export default function useCanvas({
   color,
   brushSize,
 }) {
-  const isMousePressed = useRef(false);
+  const isPointerPressed = useRef(false);
   const isDrawing = useRef(false);
   const colorRef = useRef("");
-  const lastCanvasState = useRef(null);
-  const isReentering = useRef(false);
-  const lastPoint = useRef({ x: 0, y: 0 });
   const brushSizeRef = useRef(1);
+
+  const lastCanvasState = useRef(null);
+  const strokeSegments = useRef([]);
 
   useEffect(() => {
     colorRef.current = color;
@@ -27,10 +27,12 @@ export default function useCanvas({
 
   const getCoords = (e) => {
     const canvas = canvasRef.current;
+    if (!canvas) return { x: 0, y: 0 };
     const rect = canvas.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-    return { x, y };
+    return {
+      x: e.clientX - rect.left,
+      y: e.clientY - rect.top,
+    };
   };
 
   const getContext = () => {
@@ -39,47 +41,47 @@ export default function useCanvas({
 
   useEffect(() => {
     const canvas = canvasRef.current;
-    canvas.getContext("2d", {
-      willReadFrequently: true,
-    });
+    if (canvas) {
+      canvas.getContext("2d", { willReadFrequently: true });
+      canvas.style.touchAction = "none";
+    }
   }, [canvasRef]);
 
-  const handleMouseDown = (e) => {
+  const handlePointerDown = (e) => {
     const context = getContext();
-    isMousePressed.current = true;
-    isReentering.current = false;
+    isPointerPressed.current = true;
 
     lastCanvasState.current = context.getImageData(0, 0, width, height);
-    context.beginPath();
-    const { x, y } = getCoords(e);
 
-    lastPoint.current = { x, y };
-    context.moveTo(x, y);
+    const { x, y } = getCoords(e);
+    strokeSegments.current = [[{ x, y }]];
   };
 
-  const handleMouseUp = () => {
-    if (!isDrawing.current) return;
+  const handlePointerUp = () => {
+    if (!isDrawing.current) {
+      isPointerPressed.current = false;
+      strokeSegments.current = [];
+      return;
+    }
     const context = getContext();
-    isMousePressed.current = false;
+    isPointerPressed.current = false;
     isDrawing.current = false;
-    isReentering.current = false;
-    context.closePath();
+    strokeSegments.current = [];
+
     setStrokes((prev) => [...prev, context.getImageData(0, 0, width, height)]);
   };
 
-  const handleMouseMove = (e) => {
-    if (!isMousePressed.current) return;
+  const handlePointerMove = (e) => {
+    if (!isPointerPressed.current) return;
     isDrawing.current = true;
+
     const { x, y } = getCoords(e);
     const context = getContext();
 
-    if (isReentering.current) {
-      context.moveTo(x, y);
-      isReentering.current = false;
+    const currentSegmentIndex = strokeSegments.current.length - 1;
+    if (currentSegmentIndex >= 0) {
+      strokeSegments.current[currentSegmentIndex].push({ x, y });
     }
-
-    const midPointX = (lastPoint.current.x + x) / 2;
-    const midPointY = (lastPoint.current.y + y) / 2;
 
     if (lastCanvasState.current) {
       context.putImageData(lastCanvasState.current, 0, 0);
@@ -92,43 +94,61 @@ export default function useCanvas({
     context.lineCap = "round";
     context.lineJoin = "round";
 
-    context.quadraticCurveTo(
-      lastPoint.current.x,
-      lastPoint.current.y,
-      midPointX,
-      midPointY,
-    );
-    context.stroke();
-    lastPoint.current = { x, y };
+    strokeSegments.current.forEach((points) => {
+      if (points.length < 1) return;
+
+      context.beginPath();
+      context.moveTo(points[0].x, points[0].y);
+
+      if (points.length === 1) {
+        context.lineTo(points[0].x, points[0].y);
+        context.stroke();
+        return;
+      }
+
+      for (let i = 1; i < points.length - 1; i++) {
+        const midPointX = (points[i].x + points[i + 1].x) / 2;
+        const midPointY = (points[i].y + points[i + 1].y) / 2;
+        context.quadraticCurveTo(
+          points[i].x,
+          points[i].y,
+          midPointX,
+          midPointY,
+        );
+      }
+
+      context.lineTo(points[points.length - 1].x, points[points.length - 1].y);
+      context.stroke();
+    });
   };
 
-  const handleMouseLeave = () => {};
+  const handlePointerLeave = () => {};
 
-  const handleMouseEnter = (e) => {
-    if (isMousePressed.current === true) {
-      isDrawing.current = true;
-
-      isReentering.current = true;
+  const handlePointerEnter = (e) => {
+    if (isPointerPressed.current) {
+      const { x, y } = getCoords(e);
+      strokeSegments.current.push([{ x, y }]);
     }
   };
 
   useEffect(() => {
-    const handleGlobalMouseUp = () => {
-      isMousePressed.current = false;
-      isReentering.current = false;
+    const handleGlobalPointerUp = () => {
+      if (isPointerPressed.current) {
+        handlePointerUp();
+      }
     };
 
-    document.addEventListener("mouseup", handleGlobalMouseUp);
+    document.addEventListener("pointerup", handleGlobalPointerUp);
     return () => {
-      document.removeEventListener("mouseup", handleGlobalMouseUp);
+      document.removeEventListener("pointerup", handleGlobalPointerUp);
     };
-  }, []);
+  }, [width, height]);
 
   return {
-    handleMouseDown,
-    handleMouseMove,
-    handleMouseUp,
-    handleMouseLeave,
-    handleMouseEnter,
+    handlePointerDown,
+    handlePointerMove,
+    handlePointerUp,
+    handlePointerLeave,
+    handlePointerEnter,
   };
 }
