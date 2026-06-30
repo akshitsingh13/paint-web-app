@@ -7,6 +7,7 @@ export default function useCanvas({
   height,
   setStrokes,
   color,
+  brushSize,
 }) {
   const isMousePressed = useRef(false);
   const isDrawing = useRef(false);
@@ -14,10 +15,15 @@ export default function useCanvas({
   const lastCanvasState = useRef(null);
   const isReentering = useRef(false);
   const lastPoint = useRef({ x: 0, y: 0 });
+  const brushSizeRef = useRef(1);
 
   useEffect(() => {
     colorRef.current = color;
   }, [color]);
+
+  useEffect(() => {
+    brushSizeRef.current = brushSize;
+  }, [brushSize]);
 
   const getCoords = (e) => {
     const canvas = canvasRef.current;
@@ -81,7 +87,7 @@ export default function useCanvas({
 
     context.globalCompositeOperation =
       tool === "brush" ? "source-over" : "destination-out";
-    context.lineWidth = 5;
+    context.lineWidth = brushSizeRef.current;
     context.strokeStyle = colorRef.current;
     context.lineCap = "round";
     context.lineJoin = "round";

@@ -1,7 +1,15 @@
 import { useRef, useEffect, useState } from "react";
 import useCanvas from "../hooks/useCanvas";
 
-const Canvas = ({ width, height, tool, setStrokes, color, canvasRef }) => {
+const Canvas = ({
+  width,
+  height,
+  tool,
+  setStrokes,
+  color,
+  brushSize,
+  canvasRef,
+}) => {
   const {
     handleMouseDown,
     handleMouseMove,
@@ -15,6 +23,7 @@ const Canvas = ({ width, height, tool, setStrokes, color, canvasRef }) => {
     height,
     color,
     setStrokes,
+    brushSize,
   });
 
   return (

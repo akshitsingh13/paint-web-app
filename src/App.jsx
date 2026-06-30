@@ -6,10 +6,12 @@ import { HexAlphaColorPicker } from "react-colorful";
 
 import Canvas from "./components/Canvas";
 import Tool from "./components/Tool";
+import BrushSizeSlider from "./components/BrushSizeSlider";
 
 function App() {
   const [tool, setTool] = useState("brush");
   const [color, setColor] = useState("000000ff");
+  const [brushSize, setBrushSize] = useState(5);
 
   const canvasRef = useRef(null);
 
@@ -31,6 +33,7 @@ function App() {
             color={color}
             onChange={setColor}
           />
+          <BrushSizeSlider brushSize={brushSize} setBrushSize={setBrushSize} />
           <div className="flex flex-col gap-4">
             <Tool label="Brush" onClick={handleBrushTool} />
             <Tool label="Eraser" onClick={handleEraserTool} />
@@ -56,6 +59,7 @@ function App() {
             tool={tool}
             color={color}
             setStrokes={setStrokes}
+            brushSize={brushSize}
           />
         </div>
       </div>
