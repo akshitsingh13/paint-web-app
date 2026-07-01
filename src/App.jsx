@@ -8,6 +8,7 @@ import Canvas from "./components/Canvas";
 import Tool from "./components/Tool";
 import BrushSizeSlider from "./components/BrushSizeSlider";
 import ColorPalette from "./components/ColorPallete/ColorPallete";
+import ShapesTool from "./components/ShapesTool";
 
 function App() {
   const [tool, setTool] = useState("brush");
@@ -115,6 +116,36 @@ function App() {
       <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
     </svg>
   );
+  const SaveIcon = (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      class="lucide lucide-download-icon lucide-download"
+    >
+      <path d="M12 15V3" />
+      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+      <path d="m7 10 5 5 5-5" />
+    </svg>
+  );
+
+  const downloadImage = () => {
+    const canvas = canvasRef.current;
+    const userInput = window.prompt("Enter a file name:", "drawing");
+    if (userInput === null) return;
+    const fileName = userInput.trim() || "drawing";
+    const image = canvas.toDataURL("image/png");
+    const link = document.createElement("a");
+    link.href = image;
+    link.download = fileName;
+    link.click();
+  };
 
   return (
     <>
@@ -155,21 +186,21 @@ function App() {
               disabled={redoStack.length === 0}
             />
             <Tool label={ResetIcon} onClick={onEraseAll} />
+            <Tool label={SaveIcon} onClick={downloadImage} />
           </div>
         </div>
 
-        <div>
-          <Canvas
-            canvasRef={canvasRef}
-            width={700}
-            height={500}
-            tool={tool}
-            color={color}
-            strokes={strokes}
-            setStrokes={setStrokes}
-            brushSize={brushSize}
-          />
-        </div>
+        <Canvas
+          canvasRef={canvasRef}
+          width={700}
+          height={500}
+          tool={tool}
+          color={color}
+          strokes={strokes}
+          setStrokes={setStrokes}
+          brushSize={brushSize}
+        />
+        <ShapesTool tool={tool} setTool={setTool} />
       </div>
     </>
   );

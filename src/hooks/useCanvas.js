@@ -123,6 +123,11 @@ export default function useCanvas({
 
     context.clearRect(0, 0, width, height);
 
+    context.save();
+    context.fillStyle = "#ffffff";
+    context.fillRect(0, 0, width, height);
+    context.restore();
+
     strokesRef.current.forEach((stroke) => drawStroke(context, stroke));
 
     if (currentStroke.current) {
@@ -148,15 +153,10 @@ export default function useCanvas({
   };
 
   const handlePointerUp = () => {
-    if (!isDrawing.current) {
-      isPointerPressed.current = false;
-      currentStroke.current = null;
-      return;
-    }
     isPointerPressed.current = false;
-    isDrawing.current = false;
 
     const finishedStroke = currentStroke.current;
+    isDrawing.current = false;
     currentStroke.current = null;
 
     if (finishedStroke) {
