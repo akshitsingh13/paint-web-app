@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-export default function useHistory(canvasRef) {
+export default function useHistory() {
   const [strokes, setStrokes] = useState([]);
   const [redoStack, setRedoStack] = useState([]);
 
@@ -12,15 +12,6 @@ export default function useHistory(canvasRef) {
 
     setRedoStack((prev) => [...prev, removedStroke]);
     setStrokes(newStrokes);
-
-    const canvas = canvasRef.current;
-    const context = canvas.getContext("2d");
-
-    if (newStrokes.length === 0) {
-      context.clearRect(0, 0, canvas.width, canvas.height);
-    } else {
-      context.putImageData(newStrokes[newStrokes.length - 1], 0, 0);
-    }
   };
 
   const onRedo = () => {
@@ -28,18 +19,12 @@ export default function useHistory(canvasRef) {
 
     const lastStroke = redoStack[redoStack.length - 1];
     const newRedoStack = redoStack.slice(0, redoStack.length - 1);
-    setRedoStack(newRedoStack);
-    setStrokes([...strokes, lastStroke]);
 
-    const canvas = canvasRef.current;
-    const context = canvas.getContext("2d");
-    context.putImageData(lastStroke, 0, 0);
+    setRedoStack(newRedoStack);
+    setStrokes((prev) => [...prev, lastStroke]);
   };
 
   const onEraseAll = () => {
-    const canvas = canvasRef.current;
-    const context = canvas.getContext("2d");
-    context.clearRect(0, 0, canvas.width, canvas.height);
     setStrokes([]);
     setRedoStack([]);
   };

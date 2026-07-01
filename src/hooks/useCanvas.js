@@ -5,6 +5,7 @@ export default function useCanvas({
   tool,
   width,
   height,
+  strokes,
   setStrokes,
   color,
   brushSize,
@@ -13,9 +14,13 @@ export default function useCanvas({
   const isDrawing = useRef(false);
   const colorRef = useRef("");
   const brushSizeRef = useRef(1);
+  const toolRef = useRef("brush");
 
-  const lastCanvasState = useRef(null);
-  const strokeSegments = useRef([]);
+  const ctxRef = useRef(null);
+
+  const strokesRef = useRef([]);
+
+  const currentStroke = useRef(null);
 
   useEffect(() => {
     colorRef.current = color;
@@ -24,6 +29,10 @@ export default function useCanvas({
   useEffect(() => {
     brushSizeRef.current = brushSize;
   }, [brushSize]);
+
+  useEffect(() => {
+    toolRef.current = tool;
+  }, [tool]);
 
   const getCoords = (e) => {
     const canvas = canvasRef.current;
@@ -35,66 +44,50 @@ export default function useCanvas({
     };
   };
 
-  const getContext = () => {
-    return canvasRef.current.getContext("2d");
-  };
+  const getContext = () => ctxRef.current;
 
   useEffect(() => {
     const canvas = canvasRef.current;
     if (canvas) {
-      canvas.getContext("2d", { willReadFrequently: true });
+      ctxRef.current = canvas.getContext("2d", { willReadFrequently: true });
       canvas.style.touchAction = "none";
     }
   }, [canvasRef]);
 
-  const handlePointerDown = (e) => {
-    const context = getContext();
-    isPointerPressed.current = true;
+  function makeCircularCursor(size, color = "black") {
+    const crosshairSize = 8;
+    const radius = size / 2;
+    const canvasSize = Math.max(size, crosshairSize) + 4;
+    const center = canvasSize / 2;
 
-    lastCanvasState.current = context.getImageData(0, 0, width, height);
-
-    const { x, y } = getCoords(e);
-    strokeSegments.current = [[{ x, y }]];
-  };
-
-  const handlePointerUp = () => {
-    if (!isDrawing.current) {
-      isPointerPressed.current = false;
-      strokeSegments.current = [];
-      return;
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${canvasSize}" height="${canvasSize}">
+    ${
+      size >= 4
+        ? `<circle cx="${center}" cy="${center}" r="${radius - 1}"
+      fill="none" stroke="${color}" stroke-width="1"/>`
+        : ""
     }
-    const context = getContext();
-    isPointerPressed.current = false;
-    isDrawing.current = false;
-    strokeSegments.current = [];
+    <line x1="${center - crosshairSize / 2}" y1="${center}" x2="${center + crosshairSize / 2}" y2="${center}"
+      stroke="${color}" stroke-width="1"/>
+    <line x1="${center}" y1="${center - crosshairSize / 2}" x2="${center}" y2="${center + crosshairSize / 2}"
+      stroke="${color}" stroke-width="1"/>
+  </svg>`;
 
-    setStrokes((prev) => [...prev, context.getImageData(0, 0, width, height)]);
-  };
+    const encoded = encodeURIComponent(svg);
+    return `url("data:image/svg+xml;utf8,${encoded}") ${center} ${center}, auto`;
+  }
 
-  const handlePointerMove = (e) => {
-    if (!isPointerPressed.current) return;
-    isDrawing.current = true;
-
-    const { x, y } = getCoords(e);
-    const context = getContext();
-
-    const currentSegmentIndex = strokeSegments.current.length - 1;
-    if (currentSegmentIndex >= 0) {
-      strokeSegments.current[currentSegmentIndex].push({ x, y });
-    }
-
-    if (lastCanvasState.current) {
-      context.putImageData(lastCanvasState.current, 0, 0);
-    }
+  const drawStroke = (context, stroke) => {
+    context.save();
 
     context.globalCompositeOperation =
-      tool === "brush" ? "source-over" : "destination-out";
-    context.lineWidth = brushSizeRef.current;
-    context.strokeStyle = colorRef.current;
+      stroke.tool === "brush" ? "source-over" : "destination-out";
+    context.lineWidth = stroke.size;
+    context.strokeStyle = stroke.color;
     context.lineCap = "round";
     context.lineJoin = "round";
 
-    strokeSegments.current.forEach((points) => {
+    stroke.segments.forEach((points) => {
       if (points.length < 1) return;
 
       context.beginPath();
@@ -120,15 +113,81 @@ export default function useCanvas({
       context.lineTo(points[points.length - 1].x, points[points.length - 1].y);
       context.stroke();
     });
+
+    context.restore();
   };
 
-  const handlePointerLeave = () => {};
+  const redrawAll = () => {
+    const context = getContext();
+    if (!context) return;
+
+    context.clearRect(0, 0, width, height);
+
+    strokesRef.current.forEach((stroke) => drawStroke(context, stroke));
+
+    if (currentStroke.current) {
+      drawStroke(context, currentStroke.current);
+    }
+  };
+
+  useEffect(() => {
+    strokesRef.current = strokes;
+    redrawAll();
+  }, [strokes]);
+
+  const handlePointerDown = (e) => {
+    isPointerPressed.current = true;
+
+    const { x, y } = getCoords(e);
+    currentStroke.current = {
+      tool: toolRef.current,
+      color: colorRef.current,
+      size: brushSizeRef.current,
+      segments: [[{ x, y }]],
+    };
+  };
+
+  const handlePointerUp = () => {
+    if (!isDrawing.current) {
+      isPointerPressed.current = false;
+      currentStroke.current = null;
+      return;
+    }
+    isPointerPressed.current = false;
+    isDrawing.current = false;
+
+    const finishedStroke = currentStroke.current;
+    currentStroke.current = null;
+
+    if (finishedStroke) {
+      setStrokes((prev) => [...prev, finishedStroke]);
+    }
+  };
+
+  const handlePointerMove = (e) => {
+    if (!isPointerPressed.current || !currentStroke.current) return;
+    isDrawing.current = true;
+
+    const { x, y } = getCoords(e);
+
+    const currentSegmentIndex = currentStroke.current.segments.length - 1;
+    if (currentSegmentIndex >= 0) {
+      currentStroke.current.segments[currentSegmentIndex].push({ x, y });
+    }
+
+    redrawAll();
+  };
+
+  const handlePointerLeave = () => {
+    canvasRef.current.style.cursor = "default";
+  };
 
   const handlePointerEnter = (e) => {
-    if (isPointerPressed.current) {
+    if (isPointerPressed.current && currentStroke.current) {
       const { x, y } = getCoords(e);
-      strokeSegments.current.push([{ x, y }]);
+      currentStroke.current.segments.push([{ x, y }]);
     }
+    canvasRef.current.style.cursor = makeCircularCursor(brushSizeRef.current);
   };
 
   useEffect(() => {

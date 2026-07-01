@@ -1,14 +1,16 @@
-import { useRef, useEffect, useState } from "react";
 import useCanvas from "../hooks/useCanvas";
 
 const Canvas = ({
   width,
   height,
   tool,
+  strokes,
   setStrokes,
   color,
   brushSize,
   canvasRef,
+  glow,
+  setGlow,
 }) => {
   // Destructure the new pointer-based handlers from your updated hook
   const {
@@ -23,6 +25,7 @@ const Canvas = ({
     width,
     height,
     color,
+    strokes,
     setStrokes,
     brushSize,
   });
