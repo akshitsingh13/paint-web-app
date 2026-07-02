@@ -8,7 +8,6 @@ import Canvas from "./components/Canvas";
 import Tool from "./components/Tool";
 import BrushSizeSlider from "./components/BrushSizeSlider";
 import ColorPalette from "./components/ColorPallete/ColorPallete";
-import ShapesTool from "./components/ShapesTool";
 
 function App() {
   const [tool, setTool] = useState("brush");
@@ -25,6 +24,24 @@ function App() {
   };
   const handleEraserTool = () => {
     setTool("eraser");
+  };
+  const handlePointerTool = () => {
+    setTool("pointer");
+  };
+  const handleRectangle = () => {
+    setTool("rectangle");
+  };
+  const handleCircle = () => {
+    setTool("circle");
+  };
+  const handleLine = () => {
+    setTool("line");
+  };
+  const handleRightAngleTriangle = () => {
+    setTool("rat");
+  };
+  const handleTriangle = () => {
+    setTool("triangle");
   };
 
   const BrushIcon = (
@@ -134,6 +151,103 @@ function App() {
       <path d="m7 10 5 5 5-5" />
     </svg>
   );
+  const PointerIcon = (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      class="lucide lucide-mouse-pointer-icon lucide-mouse-pointer"
+    >
+      <path d="M12.586 12.586 19 19" />
+      <path d="M3.688 3.037a.497.497 0 0 0-.651.651l6.5 15.999a.501.501 0 0 0 .947-.062l1.569-6.083a2 2 0 0 1 1.448-1.479l6.124-1.579a.5.5 0 0 0 .063-.947z" />
+    </svg>
+  );
+  const RectangleIcon = (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      class="lucide lucide-rectangle-horizontal-icon lucide-rectangle-horizontal"
+    >
+      <rect width="20" height="12" x="2" y="6" rx="2" />
+    </svg>
+  );
+  const CircleIcon = (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      class="lucide lucide-circle-icon lucide-circle"
+    >
+      <circle cx="12" cy="12" r="10" />
+    </svg>
+  );
+  const LineIcon = (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      class="lucide lucide-slash-icon lucide-slash"
+    >
+      <path d="M22 2 2 22" />
+    </svg>
+  );
+  const RATIcon = (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      class="lucide lucide-triangle-right-icon lucide-triangle-right"
+    >
+      <path d="M22 18a2 2 0 0 1-2 2H3c-1.1 0-1.3-.6-.4-1.3L20.4 4.3c.9-.7 1.6-.4 1.6.7Z" />
+    </svg>
+  );
+  const TriangleIcon = (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      class="lucide lucide-triangle-icon lucide-triangle"
+    >
+      <path d="M13.73 4a2 2 0 0 0-3.46 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z" />
+    </svg>
+  );
 
   const downloadImage = () => {
     const canvas = canvasRef.current;
@@ -149,14 +263,25 @@ function App() {
 
   return (
     <>
-      <div className="flex justify-center align-middle items-center gap-4 h-screen">
+      <div className="flex justify-center align-middle items-center p-2 gap-4 h-screen">
         <div className="flex gap-4">
           <div className="flex gap-4 flex-col">
-            <HexAlphaColorPicker
-              className="my-picker"
-              color={color}
-              onChange={setColor}
-            />
+            <div className="flex flex-col gap-4">
+              <HexAlphaColorPicker
+                className="my-picker"
+                color={color}
+                onChange={setColor}
+              />
+              <div className="flex gap-4 items-center">
+                <p>Color</p>
+                <input
+                  type="text"
+                  value={color}
+                  onChange={(e) => setColor(e.target.value)}
+                  className="input input-bordered mt-2 w-32"
+                />
+              </div>
+            </div>
             <BrushSizeSlider
               brushSize={brushSize}
               setBrushSize={setBrushSize}
@@ -166,6 +291,11 @@ function App() {
 
           <div className="flex flex-col gap-4">
             <Tool
+              label={PointerIcon}
+              onClick={handlePointerTool}
+              active={tool === "pointer"}
+            />
+            <Tool
               label={BrushIcon}
               onClick={handleBrushTool}
               active={tool === "brush"}
@@ -174,6 +304,32 @@ function App() {
               label={EraserIcon}
               onClick={handleEraserTool}
               active={tool === "eraser"}
+            />
+            <Tool
+              label={RectangleIcon}
+              onClick={handleRectangle}
+              active={tool === "rectangle"}
+            />
+
+            <Tool
+              label={CircleIcon}
+              onClick={handleCircle}
+              active={tool === "circle"}
+            />
+            <Tool
+              label={LineIcon}
+              onClick={handleLine}
+              active={tool === "line"}
+            />
+            <Tool
+              label={RATIcon}
+              onClick={handleRightAngleTriangle}
+              active={tool === "rat"}
+            />
+            <Tool
+              label={TriangleIcon}
+              onClick={handleTriangle}
+              active={tool === "triangle"}
             />
             <Tool
               label={UndoIcon}
@@ -200,7 +356,6 @@ function App() {
           setStrokes={setStrokes}
           brushSize={brushSize}
         />
-        <ShapesTool tool={tool} setTool={setTool} />
       </div>
     </>
   );

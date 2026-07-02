@@ -1,10 +1,10 @@
 const Tool = ({ label, onClick, disabled, active }) => {
   return (
-    <div className={`${active ? "aura duration-3000" : ""}`}>
+    <div className={`${active ? "aura" : ""} shrink-0`}>
       <button
         onClick={onClick}
         disabled={disabled}
-        className={`btn btn-active ${
+        className={`btn btn-active btn-sm sm:btn-md ${
           active ? "btn-primary" : ""
         } disabled:cursor-not-allowed disabled:opacity-50`}
       >
