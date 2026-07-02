@@ -9,7 +9,7 @@ const BrushSizeSlider = ({ brushSize, setBrushSize }) => {
   };
   return (
     <>
-      <div className="flex flex-col gap-4 align-middle justify-center items-center w-full">
+      <div className="flex flex-col gap-4 align-middle justify-center items-center">
         <div className="flex gap-4 align-middle justify-center items-center">
           <p>Brush Size</p>
           <input
@@ -31,7 +31,7 @@ const BrushSizeSlider = ({ brushSize, setBrushSize }) => {
           max={100}
           value={brushSize || 1}
           onChange={(e) => setBrushSize(Number(e.target.value))}
-          className="range range-sm w-full sm:w-auto"
+          className="range range-sm"
         />
       </div>
     </>

@@ -34,22 +34,13 @@ export default function useCanvas({
     toolRef.current = tool;
   }, [tool]);
 
-  // getCoords now accounts for the canvas being displayed at a different
-  // CSS size than its internal pixel resolution (width/height props).
-  // On mobile/tablet the canvas is scaled down via CSS (see Canvas.jsx),
-  // so we map the pointer position from "displayed" space back into
-  // "internal drawing" space. On desktop, where CSS size === pixel size,
-  // scaleX/scaleY are simply 1, so this is a no-op and behavior is
-  // identical to before.
   const getCoords = (e) => {
     const canvas = canvasRef.current;
     if (!canvas) return { x: 0, y: 0 };
     const rect = canvas.getBoundingClientRect();
-    const scaleX = canvas.width / rect.width;
-    const scaleY = canvas.height / rect.height;
     return {
-      x: (e.clientX - rect.left) * scaleX,
-      y: (e.clientY - rect.top) * scaleY,
+      x: e.clientX - rect.left,
+      y: e.clientY - rect.top,
     };
   };
 

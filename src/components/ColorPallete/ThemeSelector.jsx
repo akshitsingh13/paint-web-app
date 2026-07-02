@@ -49,7 +49,7 @@ const ThemeSelector = ({ currentTheme, setCurrentTheme }) => {
       </button>
 
       {open && (
-        <div className="absolute left-0 top-full mt-1 z-50 w-full min-w-[15rem] sm:w-60 rounded-box bg-base-200 border border-base-300 p-2 shadow-xl">
+        <div className="absolute left-0 top-full mt-1 z-50 w-60 rounded-box bg-base-200 border border-base-300 p-2 shadow-xl">
           {PALETTES.map((theme, index) => (
             <button
               key={theme.name}
